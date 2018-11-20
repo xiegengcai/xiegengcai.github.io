@@ -1,0 +1,1043 @@
+<!DOCTYPE html>
+
+
+
+
+
+
+  
+
+
+<html class="theme-next mist use-motion" lang="zh-CN">
+<head><meta name="generator" content="Hexo 3.8.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform">
+<meta http-equiv="Cache-Control" content="no-siteapp">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css">
+
+<link href="/css/main.css?v=6.2.0" rel="stylesheet" type="text/css">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/favicon.ico?v=6.2.0">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon.ico?v=6.2.0">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/favicon.ico?v=6.2.0">
+
+
+  <link rel="mask-icon" href="/favicon.ico?v=6.2.0" color="#222">
+
+
+
+
+
+
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Mist',
+    version: '6.2.0',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: false,
+    fastclick: false,
+    lazyload: false,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+  
+
+
+
+  <meta name="description" content="[TOC] 简介知识储备 DSDT 正则匹配（不懂就依葫芦画瓢）  背景由于普通PC的电池设备并不兼容与苹果的SMbus设备，所以，对于黑苹果，只能够通过ACPI来获取电池状态。为了解决电量显示我可是爬了不少帖子、花了不少时间呢。但是从我参考的中外教程来看，我觉得都不太理想，作为一个程序员的我都要看好几遍，普通用户怕是望而却步。再说作为小白用户其实没必要搞清楚里面的弯弯道道，能正常显示电量就是目标">
+<meta name="keywords" content="黑苹果">
+<meta property="og:type" content="article">
+<meta property="og:title" content="小白都能看懂的DSDT电量显示补丁教程">
+<meta property="og:url" content="http://xiegengcai.github.io/2018/05/05/how-to-create-battery-dsdt-fix/index.html">
+<meta property="og:site_name" content="風一様的男子">
+<meta property="og:description" content="[TOC] 简介知识储备 DSDT 正则匹配（不懂就依葫芦画瓢）  背景由于普通PC的电池设备并不兼容与苹果的SMbus设备，所以，对于黑苹果，只能够通过ACPI来获取电池状态。为了解决电量显示我可是爬了不少帖子、花了不少时间呢。但是从我参考的中外教程来看，我觉得都不太理想，作为一个程序员的我都要看好几遍，普通用户怕是望而却步。再说作为小白用户其实没必要搞清楚里面的弯弯道道，能正常显示电量就是目标">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:image" content="http://wailian.work/images/2018/05/06/DSDT-Patch-1.png">
+<meta property="og:image" content="http://wailian.work/images/2018/05/06/DSDT-Patch-2.png">
+<meta property="og:updated_time" content="2018-11-20T06:34:52.889Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="小白都能看懂的DSDT电量显示补丁教程">
+<meta name="twitter:description" content="[TOC] 简介知识储备 DSDT 正则匹配（不懂就依葫芦画瓢）  背景由于普通PC的电池设备并不兼容与苹果的SMbus设备，所以，对于黑苹果，只能够通过ACPI来获取电池状态。为了解决电量显示我可是爬了不少帖子、花了不少时间呢。但是从我参考的中外教程来看，我觉得都不太理想，作为一个程序员的我都要看好几遍，普通用户怕是望而却步。再说作为小白用户其实没必要搞清楚里面的弯弯道道，能正常显示电量就是目标">
+<meta name="twitter:image" content="http://wailian.work/images/2018/05/06/DSDT-Patch-1.png">
+
+
+
+
+
+
+  <link rel="canonical" href="http://xiegengcai.github.io/2018/05/05/how-to-create-battery-dsdt-fix/">
+
+
+
+<script type="text/javascript" id="page.configurations">
+  CONFIG.page = {
+    sidebar: "",
+  };
+</script>
+
+  <title>小白都能看懂的DSDT电量显示补丁教程 | 風一様的男子</title>
+  
+
+
+
+
+
+
+
+
+
+  <noscript>
+  <style type="text/css">
+    .use-motion .motion-element,
+    .use-motion .brand,
+    .use-motion .menu-item,
+    .sidebar-inner,
+    .use-motion .post-block,
+    .use-motion .pagination,
+    .use-motion .comments,
+    .use-motion .post-header,
+    .use-motion .post-body,
+    .use-motion .collection-title { opacity: initial; }
+
+    .use-motion .logo,
+    .use-motion .site-title,
+    .use-motion .site-subtitle {
+      opacity: initial;
+      top: initial;
+    }
+
+    .use-motion {
+      .logo-line-before i { left: initial; }
+      .logo-line-after i { right: initial; }
+    }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope="" itemtype="http://schema.org/WebPage" lang="zh-CN">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+    <a href="https://github.com/xiegengcai" class="github-corner" aria-label="View source on Github"><svg width="80" height="80" viewbox="0 0 250 250" style="fill:#151513; color:#fff; position: absolute; top: 0; border: 0; right: 0;" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"/><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"/><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"/></svg></a><style>.github-corner:hover .octo-arm{animation:octocat-wave 560ms ease-in-out}@keyframes octocat-wave{0%,100%{transform:rotate(0)}20%,60%{transform:rotate(-25deg)}40%,80%{transform:rotate(10deg)}}@media (max-width:500px){.github-corner:hover .octo-arm{animation:none}.github-corner .octo-arm{animation:octocat-wave 560ms ease-in-out}}</style>
+    <header id="header" class="header" itemscope="" itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">風一様的男子</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">谢庚才</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button aria-label="切换导航栏">
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  
+    <ul id="menu" class="menu">
+      
+        
+        
+        
+          
+          <li class="menu-item menu-item-home">
+    <a href="/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-home"></i> <br>首页</a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-about">
+    <a href="/about/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-user"></i> <br>关于</a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-tags">
+    <a href="/tags/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-tags"></i> <br>标签</a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-categories">
+    <a href="/categories/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-th"></i> <br>分类</a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-archives">
+    <a href="/archives/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-archive"></i> <br>归档</a>
+  </li>
+
+      
+      
+    </ul>
+  
+
+  
+    
+
+  
+
+  
+</nav>
+
+
+
+  
+
+
+
+</div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope="" itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://xiegengcai.github.io/2018/05/05/how-to-create-battery-dsdt-fix/">
+
+    <span hidden itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="xiegengcai">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/avatar.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope="" itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="風一様的男子">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">小白都能看懂的DSDT电量显示补丁教程
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+
+            
+            
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+
+              
+                
+              
+
+              <time title="创建时间：2018-05-05 22:56:16" itemprop="dateCreated datePublished" datetime="2018-05-05T22:56:16+08:00">2018-05-05</time>
+            
+
+            
+              
+
+              
+                
+                <span class="post-meta-divider">|</span>
+                
+
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">更新于</span>
+                
+                <time title="修改时间：2018-11-20 14:34:52" itemprop="dateModified" datetime="2018-11-20T14:34:52+08:00">2018-11-20</time>
+              
+            
+          </span>
+
+          
+            <span class="post-category">
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope="" itemtype="http://schema.org/Thing"><a href="/categories/黑苹果/" itemprop="url" rel="index"><span itemprop="name">黑苹果</span></a></span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+         
+          
+            <span class="post-meta-divider">|</span>
+            <span class="post-meta-item-icon">
+            <i class="fa fa-eye"></i>
+             阅读次数： 
+            <span class="busuanzi-value" id="busuanzi_value_page_pv"></span>
+            </span>
+          
+
+          
+           <!--<div class="post-symbolscount">-->
+              <span class="post-meta-divider">|</span>
+              
+
+              
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-file-word-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">本文字数：</span>
+                
+                <span title="本文字数">6.7k</span>
+              
+
+              
+                <span class="post-meta-divider">|</span>
+              
+
+              
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-clock-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">阅读时长 &asymp;</span>
+                
+                <span title="阅读时长">12 分钟</span>
+              
+            <!--</div>-->
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>[TOC]</p>
+<h1 id="简介"><a href="#简介" class="headerlink" title="简介"></a>简介</h1><h2 id="知识储备"><a href="#知识储备" class="headerlink" title="知识储备"></a>知识储备</h2><ul>
+<li>DSDT</li>
+<li>正则匹配（不懂就依葫芦画瓢）</li>
+</ul>
+<h2 id="背景"><a href="#背景" class="headerlink" title="背景"></a>背景</h2><p>由于普通PC的电池设备并不兼容与苹果的SMbus设备，所以，对于黑苹果，只能够通过ACPI来获取电池状态。为了解决电量显示我可是爬了不少帖子、花了不少时间呢。但是从我参考的中外教程来看，我觉得都不太理想，作为一个程序员的我都要看好几遍，普通用户怕是望而却步。再说作为小白用户其实没必要搞清楚里面的弯弯道道，能正常显示电量就是目标，所以萌生了写这篇文章的念头。</p>
+<a id="more"></a>
+<h2 id="参考资料"><a href="#参考资料" class="headerlink" title="参考资料"></a>参考资料</h2><ul>
+<li><a href="http://bbs.pcbeta.com/viewthread-1571455-1-1.html" target="_blank" rel="noopener">使用补丁修改DSDT/SSDT综合教程</a></li>
+<li><a href="https://blog.daliansky.net/Modify-DSDT-to-achieve-power-display-method.html" target="_blank" rel="noopener">修改DSDT实现电量显示方法【转载】</a></li>
+<li><a href="https://www.tonymacx86.com/threads/guide-how-to-patch-dsdt-for-working-battery-status.116102/" target="_blank" rel="noopener">How to patch DSDT for working battery status</a></li>
+<li><a href="http://bbs.pcbeta.com/viewthread-1521462-1-1.html" target="_blank" rel="noopener">制作电量显示补丁</a></li>
+</ul>
+<h1 id="准备阶段"><a href="#准备阶段" class="headerlink" title="准备阶段"></a>准备阶段</h1><p>汇集中外教程资料，准备步骤如下</p>
+<ol>
+<li><p>在DSDT文件中搜索关键词“EmbeddedControl” ，有些机型可能会有多个</p>
+<figure class="highlight tcl"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 定义一个0xFF(255)字节的EC域ECF2</span></span><br><span class="line">OperationRegion (ECF2, EmbeddedControl, Zero, <span class="number">0xFF</span>)</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>接着搜关键词“ECF2”（上面EmbeddedControl搜索到多个EC域的都要找），有些机型即使只有一个EC域也在多个块有声明（如例子附件中E430）</p>
+<figure class="highlight tcl"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line">Field (ECF2, ByteAcc, Lock, Preserve)</span><br><span class="line">&#123;</span><br><span class="line">    MBVR,   <span class="number">8</span>, </span><br><span class="line">    Offset (<span class="number">0x10</span>), </span><br><span class="line">    BDN0,   <span class="number">56</span>, </span><br><span class="line">    Offset (<span class="number">0x18</span>), </span><br><span class="line">    BME0,   <span class="number">8</span>, </span><br><span class="line">    Offset (<span class="number">0x1C</span>), </span><br><span class="line">    DAY0,   <span class="number">8</span>, </span><br><span class="line">    HUR0,   <span class="number">8</span>, </span><br><span class="line">    MIN0,   <span class="number">8</span>, </span><br><span class="line">    SEC0,   <span class="number">8</span>, </span><br><span class="line">    BMN0,   <span class="number">128</span>, </span><br><span class="line">    BCT0,   <span class="number">128</span>, </span><br><span class="line">    Offset (<span class="number">0x59</span>), </span><br><span class="line">    EC59,   <span class="number">1</span>, </span><br><span class="line">    DPDS,   <span class="number">1</span>, </span><br><span class="line">    ……</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>将第二步中所有Field里大于8位的属性定义且在别的地方有访问的都找出来，把这些变量名及调用的代码都一一用文本文件记录下来，后面高级进阶要用。任何属性在任何位置只是声明没有调用的都不用管</p>
+</li>
+<li><p>计算大于32位属性的偏移量，如上述代码</p>
+ <figure class="highlight tcl"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 16进制记法：0到15(即0 1 2 3 4 5 6 7 8 9 A B C D E F)，满16进位(0x10=16)</span></span><br><span class="line">Field (ECF2, ByteAcc, Lock, Preserve)</span><br><span class="line">&#123;</span><br><span class="line">    MBVR,   <span class="number">8</span>, </span><br><span class="line">    Offset (<span class="number">0x10</span>), // 空<span class="number">10</span>位</span><br><span class="line">    BDN0,   <span class="number">56</span>,    // <span class="number">0x10</span></span><br><span class="line">    Offset (<span class="number">0x18</span>),</span><br><span class="line">    BME0,   <span class="number">8</span>, 	   // <span class="number">0x18</span></span><br><span class="line">    Offset (<span class="number">0x1C</span>), // </span><br><span class="line">    DAY0,   <span class="number">8</span>, 	   // <span class="number">0x1C</span></span><br><span class="line">    HUR0,   <span class="number">8</span>,     // <span class="number">0x1D</span>=<span class="number">0x1C</span>+<span class="number">1</span> <span class="number">8</span>位是<span class="number">1</span>字节，所以加<span class="number">1</span>）</span><br><span class="line">    MIN0,   <span class="number">8</span>, 	   // <span class="number">0x1E</span></span><br><span class="line">    SEC0,   <span class="number">8</span>, 	   // <span class="number">0x1F</span></span><br><span class="line">    BMN0,   <span class="number">128</span>,   // <span class="number">0x20</span></span><br><span class="line">    BCT0,   <span class="number">128</span>,   // <span class="number">0x31</span>=<span class="number">0x20</span>+<span class="number">0x10</span>(<span class="number">16</span>)+<span class="number">1</span></span><br><span class="line">    Offset (<span class="number">0x59</span>), </span><br><span class="line">    EC59,   <span class="number">1</span>, </span><br><span class="line">    DPDS,   <span class="number">1</span>, </span><br><span class="line">    ……</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+</li>
+</ol>
+<h1 id="修改阶段"><a href="#修改阶段" class="headerlink" title="修改阶段"></a>修改阶段</h1><h2 id="暴力修改"><a href="#暴力修改" class="headerlink" title="暴力修改"></a>暴力修改</h2><p>从<a href="https://github.com/RehabMan/Laptop-DSDT-Patch" target="_blank" rel="noopener">Laptop-DSDT-Patch</a>下载了battery_HP-Envy-14（我的是HP Envy 13，当时认为应该是最接近的）参考对照，补丁和源文件都有的留下，补丁有源文件没有的删了，再依葫芦画瓢把源文件有补丁没有的补上，最后编译，除了16位、32位拆字节补丁无效（也就是类似下面的代码），其它的都正常，然后就傻不拉几的手工拆</p>
+<figure class="highlight tcl"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 我确定自己的设备标识也是H_EC，所以我改成into scope label ^^LPCB</span></span><br><span class="line">into device label H_EC code_regex BDC0,\s+<span class="number">16</span> replace_matched begin DC00,<span class="number">8</span>,DC01,<span class="number">8</span> end;</span><br><span class="line">……</span><br></pre></td></tr></table></figure>
+<p>特别注意类型如下代码<br><figure class="highlight tcl"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 0x10即上面找出来的BDN0偏移量</span></span><br><span class="line">into method label GBTI code_regex \(BDN0, replaceall_matched begin (RECB(<span class="number">0x10</span>,<span class="number">56</span>), end;</span><br><span class="line"><span class="comment"># 0x20即上面找出来的BMN0偏移量</span></span><br><span class="line">into method label GBTI code_regex \(BMN0, replaceall_matched begin (RECB(<span class="number">0x20</span>,<span class="number">128</span>), end;</span><br><span class="line"><span class="comment"># 0x31即上面找出来的BCT0偏移量</span></span><br><span class="line">into method label GBTI code_regex \(BCT0, replaceall_matched begin (RECB(<span class="number">0x31</span>,<span class="number">128</span>), end;</span><br></pre></td></tr></table></figure></p>
+<p>编译成功另存为aml文件替换重启正常显示电量。至此，如果你不想继续看，用我一样的笨方法理论上是能解决问题的。码农天生喜欢折腾，不然也不会玩黑苹果了，于是我把补丁文件研究了一番寻求优雅方式</p>
+<h2 id="高级进阶"><a href="#高级进阶" class="headerlink" title="高级进阶"></a>高级进阶</h2><p>通过分析补丁文件，我发现了一个特点，就是除了增加方法，其它的都是正则匹配替换（在这里我假设你懂正则），于是我去看了<a href="https://sourceforge.net/p/maciasl/wiki/Patching%20Syntax%20Grammar/" target="_blank" rel="noopener">Patching Syntax Grammar</a>，下面我简单说明一下</p>
+<ul>
+<li><p>第一部分into|into_all就是在什么范围（后面跟着的限定），into应该的匹配第一个，into_all有多少匹配多少</p>
+</li>
+<li><p>第二部分即限定，可以有All|DefinitionBlock|Scope|Method|Device|Processor|ThermalZone这些值</p>
+</li>
+<li><p>第三部分即名称标识啥的了，支持标签名称、正则匹配、父项名称等</p>
+</li>
+<li><p>第四部分selector，即选择器（支持正则）</p>
+</li>
+<li><p>第五部分动作（就是在匹配项里干什么），支持</p>
+<p>insert|set_label|replace_matched|replaceall_matched|remove_matched|removeall_matched|remove_entry|replace<em>content|store</em>%8|store_%9这些</p>
+</li>
+<li><p>begin end里面的就是主体</p>
+</li>
+</ul>
+<h3 id="拆字节补丁例子"><a href="#拆字节补丁例子" class="headerlink" title="拆字节补丁例子"></a>拆字节补丁例子</h3><figure class="highlight tcl"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 在范围为^LPCB中查找（即）BDC0, 16的内容（s+就是有至少一个空格），替换成DC00,8,DC01,8</span></span><br><span class="line"><span class="comment"># 也就是将BDC0, 16拆成两个字节DC00,8,DC01,8</span></span><br><span class="line"><span class="comment"># 注意这里16后面没有逗号(,)，替换第二个8后面也没有，所以即使是&#125;前一个也是通用的</span></span><br><span class="line"><span class="comment"># 这个是GitHub下载补丁里的，我的设备标识是H_EC，但我发现无效，原因未知，于是我改了</span></span><br><span class="line"></span><br><span class="line">into device label H_EC code_regex BDC0,\s+<span class="number">16</span> replace_matched begin DC00,<span class="number">8</span>,DC01,<span class="number">8</span> end;</span><br><span class="line">into scope label ^^LPCB code_regex BDC0,\s+<span class="number">16</span> replace_matched begin DC00,<span class="number">8</span>,DC01,<span class="number">8</span> end;</span><br><span class="line"><span class="comment"># 拆分32位属性</span></span><br><span class="line">into scope code_regex BTY0,\s+<span class="number">32</span> replace_matched begin TY00,<span class="number">8</span>,TY01,<span class="number">8</span>,TY02,<span class="number">8</span>,TY03,<span class="number">8</span> end;</span><br><span class="line"><span class="comment"># 所有大于32位的都不用拆</span></span><br></pre></td></tr></table></figure>
+<p><img src="http://wailian.work/images/2018/05/06/DSDT-Patch-1.png" alt="DSDT-Patch-1.png"></p>
+<p>从上面的图片可以看到补丁完美实现拆字节，下面再看看调用例子</p>
+<h3 id="访问属性补丁例子"><a href="#访问属性补丁例子" class="headerlink" title="访问属性补丁例子"></a>访问属性补丁例子</h3><figure class="highlight tcl"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 16位属性访问替换补丁</span></span><br><span class="line"><span class="comment"># 注意BFC0在两个方法中有调用，都要写补丁替换</span></span><br><span class="line">into method label BTIF code_regex \(BFC0, replaceall_matched begin (B1B2(FC00,FC01), end;</span><br><span class="line">into method label _Q09 code_regex \^\^BFC0\) replaceall_matched begin ^^B1B2(FC00,FC01)) end;</span><br><span class="line"><span class="comment"># 32位属性访问替换补丁</span></span><br><span class="line">into method label GBTI code_regex \(BTY0, replaceall_matched begin (B1B4(TY00,TY01,TY02,TY03), end;</span><br><span class="line"><span class="comment"># 56位属性替换补丁</span></span><br><span class="line">into method label GBTI code_regex \(BDN0, replaceall_matched begin (RECB(<span class="number">0x10</span>,<span class="number">56</span>), end;</span><br><span class="line"><span class="comment"># 128位属性替换补丁</span></span><br><span class="line">into method label GBTI code_regex \(BMN0, replaceall_matched begin (RECB(<span class="number">0x20</span>,<span class="number">128</span>), end;</span><br><span class="line"><span class="comment"># 从56位和128位属性访问补丁可以看到是通过RECB(偏移量, 位数)这个方法实现的，理论上16位、32位的</span></span><br><span class="line"><span class="comment"># 也可以不拆，访问的时候用这个方法，但是回到准备阶段第4部我们发现算每个属性的偏移量这工作比拆字节还头大</span></span><br></pre></td></tr></table></figure>
+<p><img src="http://wailian.work/images/2018/05/06/DSDT-Patch-2.png" alt="DSDT-Patch-2.png"></p>
+<h3 id="其它举例"><a href="#其它举例" class="headerlink" title="其它举例"></a>其它举例</h3><figure class="highlight tcl"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 在做Thinakpad E430电量补丁的时候发现有类型\_SB.PCI0.LPCB.EC.HWAK这样的调用，我用下面的补丁修正</span></span><br><span class="line">into method label _L43 code_regex \(\\\_SB.PCI0.LPCB.EC.HWAK replaceall_matched begin \(\\_SB.B1B2(\\_SB.PCI0.LPCB.EC.AK00, \\_SB.PCI0.LPCB.EC.AK01) end;</span><br><span class="line"><span class="comment"># 理论上不需要上面那个补丁应该都能替换掉所有的，但发现不彻底，原因未知</span></span><br><span class="line">into ALL code_regex \(\\\_SB.PCI0.LPCB.EC.HWAK replaceall_matched begin \(\\_SB.B1B2(\\_SB.PCI0.LPCB.EC.AK00, \\_SB.PCI0.LPCB.EC.AK01) end;</span><br></pre></td></tr></table></figure>
+<h2 id="RehabMan大神提供通用代码"><a href="#RehabMan大神提供通用代码" class="headerlink" title="RehabMan大神提供通用代码"></a>RehabMan大神提供通用代码</h2><figure class="highlight tcl"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 这部分之间拷贝到你的补丁文件前面</span></span><br><span class="line"><span class="comment"># 特别注意部分行后面的\n，因为补丁里你即使输入了换行也是当一行出来的，所以加入了硬换行代码</span></span><br><span class="line"><span class="comment"># 删除原有B1B2方法（一般都没）</span></span><br><span class="line">into method label B1B2 remove_entry;</span><br><span class="line"><span class="comment"># 新插入B1B2方法</span></span><br><span class="line"><span class="comment"># 这里需要注意一下，一般情况下默认的都没问题</span></span><br><span class="line"><span class="comment"># 有些型号可能会导致打完补丁的少量代码访问不了B1B2方法</span></span><br><span class="line"><span class="comment"># 这时候要么调整补丁绝对路径访问，要么插入的时候改个位置</span></span><br><span class="line">into definitionblock code_regex . insert</span><br><span class="line"><span class="comment"># into Scope label \_SB code_regex . insert // 这是我改的位置</span></span><br><span class="line">begin</span><br><span class="line">Method (B1B2, <span class="number">2</span>, NotSerialized) &#123; Return(Or(Arg0, ShiftLeft(Arg1, <span class="number">8</span>))) &#125;</span><br><span class="line">end;</span><br><span class="line"></span><br><span class="line">into method label B1B4 remove_entry;</span><br><span class="line">into definitionblock code_regex . insert</span><br><span class="line">begin</span><br><span class="line">Method (B1B4, <span class="number">4</span>, NotSerialized)\n</span><br><span class="line">&#123;\n</span><br><span class="line">Store(Arg3, Local0)\n</span><br><span class="line">Or(Arg2, ShiftLeft(Local0, <span class="number">8</span>), Local0)\n</span><br><span class="line">Or(Arg1, ShiftLeft(Local0, <span class="number">8</span>), Local0)\n</span><br><span class="line">Or(Arg0, ShiftLeft(Local0, <span class="number">8</span>), Local0)\n</span><br><span class="line">Return(Local0)\n</span><br><span class="line">&#125;\n</span><br><span class="line">end;</span><br><span class="line"></span><br><span class="line">into method label RE1B parent_label EC0 remove_entry;</span><br><span class="line">into method label RECB parent_label EC0 remove_entry;</span><br><span class="line">into device label EC0 insert</span><br><span class="line">begin\n</span><br><span class="line">Method (RE1B, <span class="number">1</span>, NotSerialized)\n</span><br><span class="line">// Arg0 - offset in bytes from zero-based EC\n</span><br><span class="line">&#123;\n</span><br><span class="line">OperationRegion(ECOR, EmbeddedControl, Arg0, <span class="number">1</span>)\n</span><br><span class="line">Field(ECOR, ByteAcc, NoLock, Preserve) &#123; BYTE, <span class="number">8</span> &#125;\n</span><br><span class="line">Return(BYTE)\n</span><br><span class="line">&#125;\n</span><br><span class="line">Method (RECB, <span class="number">2</span>, Serialized)\n</span><br><span class="line">// Arg0 - offset in bytes from zero-based EC\n</span><br><span class="line">// Arg1 - size of buffer in bits\n</span><br><span class="line">&#123;\n</span><br><span class="line">ShiftRight(Arg1, <span class="number">3</span>, Arg1)\n</span><br><span class="line">Name(TEMP, Buffer(Arg1) &#123; &#125;)\n</span><br><span class="line">Add(Arg0, Arg1, Arg1)\n</span><br><span class="line">Store(<span class="number">0</span>, Local0)\n</span><br><span class="line">While (LLess(Arg0, Arg1))\n</span><br><span class="line">&#123;\n</span><br><span class="line">Store(RE1B(Arg0), Index(TEMP, Local0))</span><br><span class="line">Increment(Arg0)</span><br><span class="line">Increment(Local0)</span><br><span class="line">&#125;</span><br><span class="line">Return(TEMP)\n</span><br><span class="line">&#125;\n</span><br><span class="line">end;</span><br><span class="line"></span><br><span class="line">into method label RE1B parent_label EC remove_entry;</span><br><span class="line">into method label RECB parent_label EC remove_entry;</span><br><span class="line">into device label EC insert</span><br><span class="line">begin</span><br><span class="line">Method (RE1B, <span class="number">1</span>, NotSerialized)\n</span><br><span class="line">// Arg0 - offset in bytes from zero-based EC\n</span><br><span class="line">&#123;\n</span><br><span class="line">OperationRegion(ECOR, EmbeddedControl, Arg0, <span class="number">1</span>)\n</span><br><span class="line">Field(ECOR, ByteAcc, NoLock, Preserve) &#123; BYTE, <span class="number">8</span> &#125;\n</span><br><span class="line">Return(BYTE)\n</span><br><span class="line">&#125;\n</span><br><span class="line">Method (RECB, <span class="number">2</span>, Serialized)\n</span><br><span class="line">// Arg0 - offset in bytes from zero-based EC\n</span><br><span class="line">// Arg1 - size of buffer in bits\n</span><br><span class="line">&#123;\n</span><br><span class="line">ShiftRight(Arg1, <span class="number">3</span>, Arg1)\n</span><br><span class="line">Name(TEMP, Buffer(Arg1) &#123; &#125;)\n</span><br><span class="line">Add(Arg0, Arg1, Arg1)\n</span><br><span class="line">Store(<span class="number">0</span>, Local0)\n</span><br><span class="line">While (LLess(Arg0, Arg1))\n</span><br><span class="line">&#123;\n</span><br><span class="line">Store(RE1B(Arg0), Index(TEMP, Local0))\n</span><br><span class="line">Increment(Arg0)\n</span><br><span class="line">Increment(Local0)\n</span><br><span class="line">&#125;\n</span><br><span class="line">Return(TEMP)\n</span><br><span class="line">&#125;\n</span><br><span class="line">end;</span><br></pre></td></tr></table></figure>
+<h2 id="补丁例子"><a href="#补丁例子" class="headerlink" title="补丁例子"></a>补丁例子</h2><p>提供我做的两个型号（HP-ENVY-13及ThinkaPad E430）的补丁及原始DSL文件参考</p>
+<p>链接: <a href="https://pan.baidu.com/s/1Y8Vcnzn-SFTEZ_itMcRvKw" target="_blank" rel="noopener">https://pan.baidu.com/s/1Y8Vcnzn-SFTEZ_itMcRvKw</a> 密码: gryy</p>
+
+      
+    </div>
+
+    
+
+    
+    
+    
+
+    <div>
+      
+        <div>
+    
+        <div style="text-align:center;color: #ccc;font-size:14px;">-------------本文结束<i class="fa fa-paw"></i>感谢您的阅读-------------</div>
+    
+</div>
+      
+    </div>
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/黑苹果/" rel="tag"><!-- # --><i class="fa fa-tag"></i> 黑苹果</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2018/03/31/spring-cloud-introduce/" rel="next" title="Spring Cloud介绍">
+                <i class="fa fa-chevron-left"></i> Spring Cloud介绍
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2018/05/16/spring-cloud-eureka/" rel="prev" title="Spring Cloud之服务治理——Spring Cloud Eureka">
+                Spring Cloud之服务治理——Spring Cloud Eureka <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image" src="/avatar.jpg" alt="xiegengcai">
+            
+              <p class="site-author-name" itemprop="name">xiegengcai</p>
+              <p class="site-description motion-element" itemprop="description">为生活奔波的老男人</p>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives/">
+                
+                    <span class="site-state-item-count">12</span>
+                    <span class="site-state-item-name">日志</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-categories">
+                  <a href="/categories/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">3</span>
+                    <span class="site-state-item-name">分类</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-tags">
+                  <a href="/tags/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">6</span>
+                    <span class="site-state-item-name">标签</span>
+                  </a>
+                </div>
+              
+            </nav>
+          
+
+          
+
+          
+            <div class="links-of-author motion-element">
+              
+                <span class="links-of-author-item">
+                  <a href="https://github.com/xiegengcai" target="_blank" title="GitHub"><i class="fa fa-fw fa-github"></i>GitHub</a>
+                  
+                </span>
+              
+                <span class="links-of-author-item">
+                  <a href="mailto:xiegengcai@foxmail.com" target="_blank" title="E-Mail"><i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+                  
+                </span>
+              
+                <span class="links-of-author-item">
+                  <a href="https://twitter.com/xiegengcai" target="_blank" title="Twitter"><i class="fa fa-fw fa-twitter"></i>Twitter</a>
+                  
+                </span>
+              
+                <span class="links-of-author-item">
+                  <a href="http://stackoverflow.com/users/2097809" target="_blank" title="StackOverflow"><i class="fa fa-fw fa-stack-overflow"></i>StackOverflow</a>
+                  
+                </span>
+              
+                <span class="links-of-author-item">
+                  <a href="http://weibo.com/xiegengcai" target="_blank" title="Weibo"><i class="fa fa-fw fa-weibo"></i>Weibo</a>
+                  
+                </span>
+              
+                <span class="links-of-author-item">
+                  <a href="https://www.zhihu.com/people/xiegengcai" target="_blank" title="Zhihu"><i class="fa fa-fw fa-Zhihu"></i>Zhihu</a>
+                  
+                </span>
+              
+            </div>
+          
+
+          
+          
+
+          
+          
+
+          
+            
+          
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#简介"><span class="nav-number">1.</span> <span class="nav-text">简介</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#知识储备"><span class="nav-number">1.1.</span> <span class="nav-text">知识储备</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#背景"><span class="nav-number">1.2.</span> <span class="nav-text">背景</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#参考资料"><span class="nav-number">1.3.</span> <span class="nav-text">参考资料</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#准备阶段"><span class="nav-number">2.</span> <span class="nav-text">准备阶段</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#修改阶段"><span class="nav-number">3.</span> <span class="nav-text">修改阶段</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#暴力修改"><span class="nav-number">3.1.</span> <span class="nav-text">暴力修改</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#高级进阶"><span class="nav-number">3.2.</span> <span class="nav-text">高级进阶</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#拆字节补丁例子"><span class="nav-number">3.2.1.</span> <span class="nav-text">拆字节补丁例子</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#访问属性补丁例子"><span class="nav-number">3.2.2.</span> <span class="nav-text">访问属性补丁例子</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#其它举例"><span class="nav-number">3.2.3.</span> <span class="nav-text">其它举例</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#RehabMan大神提供通用代码"><span class="nav-number">3.3.</span> <span class="nav-text">RehabMan大神提供通用代码</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#补丁例子"><span class="nav-number">3.4.</span> <span class="nav-text">补丁例子</span></a></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; 2016 &mdash; <span itemprop="copyrightYear">2018</span>
+  <span class="with-love" id="animate">
+    <i class="fa fa-xiegengcai"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">xiegengcai</span>
+
+  
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-area-chart"></i>
+    </span>
+    
+      <span class="post-meta-item-text">站点总字数：</span>
+    
+    <span title="站点总字数">62k</span>
+  
+
+  
+</div>
+
+
+
+
+  
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动 v3.8.0</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/theme-next/hexo-theme-next">NexT.Mist</a> v6.2.0</div>
+
+
+
+
+        
+<div class="busuanzi-count">
+  <script async src="https://dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+  
+    <span class="site-uv" title="总访客量">
+      <i class="fa fa-user"></i>
+      <span class="busuanzi-value">总访客量</span>
+      <span class="busuanzi-value" id="busuanzi_value_site_uv"></span>
+    </span>
+  
+
+  
+    <span class="site-pv" title="总访问量">
+      <i class="fa fa-eye"></i>
+      <span class="busuanzi-value">总访问量</span>
+      <span class="busuanzi-value" id="busuanzi_value_site_pv"></span>
+    </span>
+  
+</div>
+
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=6.2.0"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=6.2.0"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=6.2.0"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=6.2.0"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=6.2.0"></script>
+
+
+
+  
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+  <style>
+      .copy-btn {
+          display: inline-block;
+          padding: 6px 12px;
+          font-size: 13px;
+          font-weight: 700;
+          line-height: 20px;
+          color: #333;
+          white-space: nowrap;
+          vertical-align: middle;
+          cursor: pointer;
+          background-color: #eee;
+          background-image: linear-gradient(#fcfcfc, #eee);
+          border: 1px solid #d5d5d5;
+          border-radius: 3px;
+          user-select: none;
+      }
+
+      .highlight-wrap .copy-btn {
+          transition: opacity .3s ease-in-out;
+          opacity: 0;
+          padding: 2px 6px;
+          position: absolute;
+          right: 4px;
+          top: 8px;
+      }
+
+      .highlight-wrap:hover .copy-btn,
+      .highlight-wrap .copy-btn:focus {
+          opacity: 1
+      }
+
+      .highlight-wrap {
+          position: relative;
+      }
+  </style>
+  <script>
+      $('.highlight').each(function(i, e) {
+          var $wrap = $('<div>').addClass('highlight-wrap')
+          $(e).after($wrap)
+          $wrap.append($('<button>').addClass('copy-btn').append('复制').on('click', function(e) {
+              var code = $(e.target).parent().find('.code').find('.line').map(function(i, e) {
+                  return $(e).text()
+              }).toArray().join('\n')
+              var ta = document.createElement('textarea')
+              document.body.appendChild(ta)
+              ta.style.position = 'fixed'
+              ta.style.top = 0
+              ta.style.left = 0
+              ta.value = code
+              ta.select()
+              ta.focus()
+              document.execCommand('copy')
+              document.body.removeChild(ta)
+          })).append(e)
+      })
+  </script>
+
+
+</body>
+</html>
